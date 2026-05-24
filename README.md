@@ -1,8 +1,12 @@
 # convopack
 
-Framework-agnostic, provider-agnostic context-window packer for LLM chat history.
+[![PyPI](https://img.shields.io/pypi/v/convopack.svg)](https://pypi.org/project/convopack/)
+[![Python](https://img.shields.io/pypi/pyversions/convopack.svg)](https://pypi.org/project/convopack/)
+[![CI](https://github.com/Mrrobi/convopack/actions/workflows/ci.yml/badge.svg)](https://github.com/Mrrobi/convopack/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Mrrobi/convopack/branch/main/graph/badge.svg)](https://codecov.io/gh/Mrrobi/convopack)
+[![License](https://img.shields.io/pypi/l/convopack.svg)](https://github.com/Mrrobi/convopack/blob/main/LICENSE)
 
-> **Status:** pre-alpha. API may change before `0.1.0`.
+Framework-agnostic, provider-agnostic context-window packer for LLM chat history.
 
 ## Why
 
