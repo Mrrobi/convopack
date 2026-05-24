@@ -13,6 +13,7 @@ from convopack.providers.anthropic import (
     from_anthropic,
     to_anthropic,
 )
+from convopack.providers.gemini import GeminiPayload, from_gemini, to_gemini
 from convopack.providers.openai import from_openai, to_openai
 from convopack.strategies import Recency, Strategy
 from convopack.tokenizers import Tokenizer, get_tokenizer
@@ -116,6 +117,16 @@ class Packer:
         """Convenience: accept Anthropic Messages dicts, return a packed payload."""
         result = self.pack(from_anthropic(raw, system=system))
         return to_anthropic(result.kept)
+
+    def pack_gemini(
+        self,
+        raw: Iterable[dict[str, Any]],
+        *,
+        system_instruction: str | None = None,
+    ) -> GeminiPayload:
+        """Convenience: accept Gemini ``Content`` dicts, return a packed payload."""
+        result = self.pack(from_gemini(raw, system_instruction=system_instruction))
+        return to_gemini(result.kept)
 
     def _resolve_pinned(self, msgs: list[Message]) -> set[int]:
         if not msgs:
