@@ -128,6 +128,18 @@ class Packer:
         result = self.pack(from_gemini(raw, system_instruction=system_instruction))
         return to_gemini(result.kept)
 
+    def pack_langchain(self, raw: Iterable[Any]) -> list[Any]:
+        """Convenience: accept LangChain ``BaseMessage`` objects, return packed objects.
+
+        Drop-in replacement for ``langchain_core.messages.trim_messages`` with
+        the added guarantee that ``tool_use`` / ``tool_result`` pairs stay
+        atomic.
+        """
+        from convopack.providers.langchain import from_langchain, to_langchain
+
+        result = self.pack(from_langchain(raw))
+        return to_langchain(result.kept)
+
     def _resolve_pinned(self, msgs: list[Message]) -> set[int]:
         if not msgs:
             return set()

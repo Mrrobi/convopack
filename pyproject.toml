@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "convopack"
-version = "0.1.0"
+version = "0.2.0"
 description = "Framework-agnostic, provider-agnostic context-window packer for LLM chat history."
 readme = "README.md"
 license = "MIT"
@@ -40,13 +40,21 @@ dependencies = []
 tiktoken = ["tiktoken>=0.7"]
 anthropic = ["anthropic>=0.40"]
 huggingface = ["transformers>=4.40"]
+langchain = ["langchain-core>=0.3"]
+pydantic = ["pydantic>=2.7"]
+mem0 = ["mem0ai>=0.1"]
 docs = [
   "mkdocs>=1.6",
   "mkdocs-material>=9.5",
   "mkdocstrings[python]>=0.26",
   "pymdown-extensions>=10.10",
 ]
-all = ["tiktoken>=0.7", "anthropic>=0.40", "transformers>=4.40"]
+all = [
+  "tiktoken>=0.7",
+  "anthropic>=0.40",
+  "transformers>=4.40",
+  "langchain-core>=0.3",
+]
 dev = [
   "pytest>=8",
   "pytest-asyncio>=0.23",
@@ -58,7 +66,11 @@ dev = [
   "tiktoken>=0.7",
   "anthropic>=0.40",
   "transformers>=4.40",
+  "langchain-core>=0.3",
 ]
+
+[project.scripts]
+convopack = "convopack.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/mrrobi/convopack"
@@ -109,7 +121,7 @@ warn_redundant_casts = true
 files = ["src/convopack"]
 
 [[tool.mypy.overrides]]
-module = ["tiktoken.*", "anthropic.*", "transformers.*"]
+module = ["tiktoken.*", "anthropic.*", "transformers.*", "langchain_core.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
