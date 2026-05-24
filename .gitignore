@@ -63,3 +63,9 @@ Thumbs.db
 
 # Project
 *.local
+
+# mkdocs build output
+site/
+
+# Build artifacts
+dist/
