@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
-authors = [{ name = "robi", email = "robi@hjemla.no" }]
+authors = [{ name = "Mrrobi", email = "mrrobi040@gmail.com" }]
 keywords = [
   "llm",
   "openai",
@@ -51,10 +51,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/hjemla/convopack"
-Repository = "https://github.com/hjemla/convopack"
-Issues = "https://github.com/hjemla/convopack/issues"
-Changelog = "https://github.com/hjemla/convopack/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/mrrobi/convopack"
+Repository = "https://github.com/mrrobi/convopack"
+Issues = "https://github.com/mrrobi/convopack/issues"
+Changelog = "https://github.com/mrrobi/convopack/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/convopack"]
