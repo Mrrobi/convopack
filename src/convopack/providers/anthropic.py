@@ -19,9 +19,14 @@ from convopack._types import (
 
 @dataclass(slots=True)
 class AnthropicPayload:
-    """The two pieces an Anthropic ``messages.create`` call wants."""
+    """The two pieces an Anthropic ``messages.create`` call wants.
 
-    system: str
+    ``system`` is a plain string by default; if any cache marker was applied
+    it becomes a list of text-block dicts so ``cache_control`` can be
+    attached. The Anthropic SDK accepts both forms.
+    """
+
+    system: str | list[dict[str, Any]]
     messages: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -93,28 +98,60 @@ def from_anthropic(messages: Iterable[dict[str, Any]], system: str | None = None
     return out
 
 
-def to_anthropic(messages: Iterable[Message]) -> AnthropicPayload:
+def to_anthropic(
+    messages: Iterable[Message],
+    *,
+    cache_markers: list[int] | None = None,
+) -> AnthropicPayload:
     """Convert internal messages to an :class:`AnthropicPayload`.
 
     System messages are concatenated into a single ``system`` string. The
     remaining messages are emitted in Anthropic content-block shape.
+
+    If ``cache_markers`` is provided, it is interpreted as indices into the
+    *input* ``messages`` list; the **last content block** of each marked
+    message receives ``{"cache_control": {"type": "ephemeral"}}``. Markers
+    pointing at system messages are attached to the system string fragment
+    instead, since Anthropic's system field is just a list of text blocks
+    under the hood.
     """
     msgs = list(messages)
-    system_parts: list[str] = []
+    markers = set(cache_markers or [])
+    system_parts: list[dict[str, Any]] = []
     api_msgs: list[dict[str, Any]] = []
-    for msg in msgs:
+    for i, msg in enumerate(msgs):
+        is_marked = i in markers
         if msg.role == "system":
-            system_parts.append(msg.text())
+            entry: dict[str, Any] = {"type": "text", "text": msg.text()}
+            if is_marked:
+                entry["cache_control"] = {"type": "ephemeral"}
+            system_parts.append(entry)
             continue
+
+        blocks = [_block_to_anthropic(b) for b in msg.content]
+        if is_marked and blocks:
+            blocks[-1] = {**blocks[-1], "cache_control": {"type": "ephemeral"}}
+
         if msg.role == "tool":
-            api_msgs.append(
-                {"role": "user", "content": [_block_to_anthropic(b) for b in msg.content]}
-            )
+            api_msgs.append({"role": "user", "content": blocks})
             continue
-        api_msgs.append(
-            {"role": msg.role, "content": [_block_to_anthropic(b) for b in msg.content]}
-        )
-    return AnthropicPayload(system="\n\n".join(p for p in system_parts if p), messages=api_msgs)
+        api_msgs.append({"role": msg.role, "content": blocks})
+
+    return AnthropicPayload(system=_render_system(system_parts), messages=api_msgs)
+
+
+def _render_system(parts: list[dict[str, Any]]) -> Any:
+    """Return Anthropic's preferred system shape.
+
+    If no cache markers are present, a plain string keeps the payload
+    compatible with older Anthropic SDK versions. As soon as a marker shows
+    up we must use the list-of-text-blocks form.
+    """
+    has_marker = any("cache_control" in p for p in parts)
+    text = "\n\n".join(p["text"] for p in parts if p["text"])
+    if not has_marker:
+        return text
+    return parts
 
 
 def _block_to_anthropic(block: ContentBlock) -> dict[str, Any]:

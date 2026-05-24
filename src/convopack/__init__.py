@@ -9,6 +9,7 @@ from convopack._types import (
     TextBlock,
     ToolResultBlock,
     ToolUseBlock,
+    history_hash,
 )
 from convopack.embedders import Embedder
 from convopack.events import PackEvent, PackEventKind
@@ -45,6 +46,7 @@ __all__ = [
     "ToolResultBlock",
     "ToolUseBlock",
     "get_tokenizer",
+    "history_hash",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

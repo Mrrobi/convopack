@@ -80,9 +80,13 @@ nav:
       - Providers: guide/providers.md
       - Pinning: guide/pinning.md
       - Streaming events: guide/events.md
+      - Prompt caching: guide/caching.md
   - Recipes:
       - OpenAI chat loop: recipes/openai-loop.md
       - Anthropic agent with tools: recipes/anthropic-tools.md
+      - Anthropic managed context: recipes/anthropic-managed.md
+      - LiteLLM loop: recipes/litellm.md
+      - DSPy integration: recipes/dspy.md
       - Async summarisation: recipes/async-summary.md
       - Custom importance scoring: recipes/importance.md
   - Why convopack: comparison.md

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "convopack"
-version = "0.2.0"
+version = "0.3.0"
 description = "Framework-agnostic, provider-agnostic context-window packer for LLM chat history."
 readme = "README.md"
 license = "MIT"
@@ -43,6 +43,8 @@ huggingface = ["transformers>=4.40"]
 langchain = ["langchain-core>=0.3"]
 pydantic = ["pydantic>=2.7"]
 mem0 = ["mem0ai>=0.1"]
+litellm = ["litellm>=1.40"]
+dspy = ["dspy>=2.5"]
 docs = [
   "mkdocs>=1.6",
   "mkdocs-material>=9.5",
@@ -121,7 +123,14 @@ warn_redundant_casts = true
 files = ["src/convopack"]
 
 [[tool.mypy.overrides]]
-module = ["tiktoken.*", "anthropic.*", "transformers.*", "langchain_core.*"]
+module = [
+  "tiktoken.*",
+  "anthropic.*",
+  "transformers.*",
+  "langchain_core.*",
+  "dspy.*",
+  "litellm.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

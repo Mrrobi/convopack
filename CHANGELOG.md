@@ -7,7 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-05-24
+## [0.3.0] - 2026-05-24
+
+### Added
+- Prompt caching layer. `Packer(cache=True)` populates
+  `PackResult.cache_markers` with indices into `kept` that should receive a
+  cache breakpoint. `to_anthropic()` emits Anthropic
+  `{"cache_control": {"type": "ephemeral"}}` on those messages, respecting
+  the 4-marker cap and never marking the volatile `last_user`.
+- `Packer.cache_prefix_signature(history)` returns a sha256 of the stable
+  prefix -- use it to detect drift that would invalidate OpenAI's automatic
+  prompt caching.
+- `Packer.cache_info(history)` reports markers, marked-token count, and an
+  estimated hit ratio.
+- Stable `Message.content_hash` (sha256 over canonical semantic form,
+  excludes runtime tool-call IDs) and `history_hash()` helper.
+- LiteLLM provider adapter (`from_litellm` / `to_litellm`,
+  `Packer.pack_litellm`), the OpenAI-shape passthrough for the LiteLLM
+  ecosystem.
+- DSPy adapter (`from_dspy` / `to_dspy`, `Packer.pack_dspy`) that accepts a
+  `dspy.History` or a plain dict list and optionally returns a
+  `dspy.History`.
+- Anthropic server-side managed-context wrapper. New
+  `convopack.anthropic_managed.ContextManagementConfig` builder plus
+  `Packer.pack_anthropic_managed(history, system, trigger_tokens,
+  keep_tool_uses)` returning `(payload, context_management_dict)` ready to
+  pass to `messages.create`.
+- Docs: `guide/caching.md`, `recipes/litellm.md`, `recipes/dspy.md`,
+  `recipes/anthropic-managed.md`.
+
+### Changed
+- `AnthropicPayload.system` is now `str | list[dict]`. A plain string is
+  returned when no cache markers are applied (compatible with all SDK
+  versions); the list-of-text-blocks form is used when markers exist.
+
+[0.3.0]: https://github.com/Mrrobi/convopack/releases/tag/v0.3.0
 
 ### Added
 - `FirstFit` strategy: counterpart to `Recency` that keeps the oldest chunks

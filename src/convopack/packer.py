@@ -7,6 +7,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
 from convopack._types import Message, PackResult
+from convopack.caching import stable_marker_indices
 from convopack.events import PackEvent
 from convopack.providers.anthropic import (
     AnthropicPayload,
@@ -39,6 +40,7 @@ class Packer:
         tokenizer: str | Tokenizer = "approx",
         strategy: Strategy | None = None,
         pin: Sequence[PinSpec] = ("system",),
+        cache: bool = False,
     ) -> None:
         if budget <= 0:
             raise ValueError("budget must be positive")
@@ -46,14 +48,18 @@ class Packer:
         self.tokenizer = get_tokenizer(tokenizer)
         self.strategy = strategy or Recency()
         self.pin = tuple(pin)
+        self.cache = cache
 
     def pack(self, messages: Iterable[Message]) -> PackResult:
         """Pack a sequence of internal :class:`Message` objects."""
         msgs = list(messages)
         pinned = self._resolve_pinned(msgs)
-        return self.strategy.pack(
+        result = self.strategy.pack(
             msgs, budget=self.budget, tokenizer=self.tokenizer, pinned_indices=pinned
         )
+        if self.cache:
+            result.cache_markers = stable_marker_indices(result.kept, pin_specs=self.pin)
+        return result
 
     async def pack_async(self, messages: Iterable[Message]) -> PackResult:
         """Async variant. Runs sync strategies in a thread; awaits async summarisers."""
@@ -68,13 +74,16 @@ class Packer:
                 tokenizer=self.tokenizer,
                 pinned_indices=pinned,
             )
-        return await asyncio.to_thread(
+        result = await asyncio.to_thread(
             strategy.pack,
             msgs,
             budget=self.budget,
             tokenizer=self.tokenizer,
             pinned_indices=pinned,
         )
+        if self.cache:
+            result.cache_markers = stable_marker_indices(result.kept, pin_specs=self.pin)
+        return result
 
     def pack_stream(self, messages: Iterable[Message]) -> Iterator[PackEvent]:
         """Yield :class:`PackEvent` items reflecting the strategy's decisions.
@@ -114,9 +123,14 @@ class Packer:
     def pack_anthropic(
         self, raw: Iterable[dict[str, Any]], *, system: str | None = None
     ) -> AnthropicPayload:
-        """Convenience: accept Anthropic Messages dicts, return a packed payload."""
+        """Convenience: accept Anthropic Messages dicts, return a packed payload.
+
+        Cache markers (from ``Packer(cache=True)``) are forwarded so the
+        resulting payload's content blocks carry the appropriate
+        ``cache_control`` markers for Anthropic prompt caching.
+        """
         result = self.pack(from_anthropic(raw, system=system))
-        return to_anthropic(result.kept)
+        return to_anthropic(result.kept, cache_markers=result.cache_markers)
 
     def pack_gemini(
         self,
@@ -127,6 +141,92 @@ class Packer:
         """Convenience: accept Gemini ``Content`` dicts, return a packed payload."""
         result = self.pack(from_gemini(raw, system_instruction=system_instruction))
         return to_gemini(result.kept)
+
+    def cache_prefix_signature(self, messages: Iterable[Message]) -> str:
+        """Return a sha256 of the *stable* prefix that should drive cache hits.
+
+        For OpenAI's automatic prefix caching to work, the leading slice of
+        every call must be byte-identical to prior calls. This signature
+        covers exactly the kept messages flagged as cache-stable -- the same
+        ones that would receive an Anthropic ``cache_control`` marker. If the
+        signature differs between two calls, your cache prefix has drifted.
+        """
+        from convopack._types import history_hash
+
+        msgs = list(messages)
+        result = self.pack(msgs)
+        markers = stable_marker_indices(result.kept, pin_specs=self.pin)
+        if not markers:
+            return history_hash([])
+        prefix_end = max(markers) + 1
+        return history_hash(result.kept[:prefix_end])
+
+    def cache_info(self, messages: Iterable[Message]) -> dict[str, Any]:
+        """Report what would be cached for a given history.
+
+        Returns a dict with:
+
+        * ``markers`` -- indices into ``kept`` that get a cache marker.
+        * ``marked_messages`` -- count of those messages.
+        * ``marked_tokens`` -- tokens covered by the marked prefix.
+        * ``total_tokens`` -- tokens in the entire packed output.
+        * ``hit_ratio`` -- ``marked_tokens / total_tokens`` (estimated hit
+          ratio on the *next* call if the prefix doesn't drift).
+        * ``prefix_signature`` -- ``cache_prefix_signature`` for convenience.
+        """
+        msgs = list(messages)
+        result = self.pack(msgs)
+        markers = stable_marker_indices(result.kept, pin_specs=self.pin)
+        marked_tokens = sum(
+            self.tokenizer.count_message(result.kept[i])
+            for i in markers
+            if 0 <= i < len(result.kept)
+        )
+        total = result.token_count or 1
+        return {
+            "markers": markers,
+            "marked_messages": len(markers),
+            "marked_tokens": marked_tokens,
+            "total_tokens": result.token_count,
+            "hit_ratio": marked_tokens / total,
+            "prefix_signature": self.cache_prefix_signature(msgs),
+        }
+
+    def pack_litellm(self, raw: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Convenience: accept LiteLLM messages (OpenAI Chat shape), return packed dicts."""
+        from convopack.providers.litellm import from_litellm, to_litellm
+
+        return to_litellm(self.pack(from_litellm(raw)).kept)
+
+    def pack_dspy(self, raw: Any, *, as_history: bool = False) -> Any:
+        """Convenience: accept dspy.History or message list, return packed equivalent."""
+        from convopack.providers.dspy import from_dspy, to_dspy
+
+        return to_dspy(self.pack(from_dspy(raw)).kept, as_history=as_history)
+
+    def pack_anthropic_managed(
+        self,
+        raw: Iterable[dict[str, Any]],
+        *,
+        system: str | None = None,
+        trigger_tokens: int = 30_000,
+        keep_tool_uses: int = 3,
+    ) -> tuple[AnthropicPayload, dict[str, Any]]:
+        """Pack AND build an Anthropic ``context_management`` config in one call.
+
+        The returned tuple is ``(payload, context_management_dict)``. Pass
+        the dict as the ``context_management`` argument of
+        ``client.messages.create``. ``trigger_tokens`` controls when the
+        server compresses; ``keep_tool_uses`` is how many recent tool
+        exchanges survive its compression.
+        """
+        from convopack.anthropic_managed import ContextManagementConfig
+
+        payload = self.pack_anthropic(raw, system=system)
+        config = ContextManagementConfig.clear_tool_uses(
+            trigger_tokens=trigger_tokens, keep_n=keep_tool_uses
+        )
+        return payload, config.to_dict()
 
     def pack_langchain(self, raw: Iterable[Any]) -> list[Any]:
         """Convenience: accept LangChain ``BaseMessage`` objects, return packed objects.
