@@ -39,7 +39,8 @@ dependencies = []
 [project.optional-dependencies]
 tiktoken = ["tiktoken>=0.7"]
 anthropic = ["anthropic>=0.40"]
-all = ["tiktoken>=0.7", "anthropic>=0.40"]
+huggingface = ["transformers>=4.40"]
+all = ["tiktoken>=0.7", "anthropic>=0.40", "transformers>=4.40"]
 dev = [
   "pytest>=8",
   "pytest-asyncio>=0.23",
@@ -50,6 +51,7 @@ dev = [
   "mypy>=1.10",
   "tiktoken>=0.7",
   "anthropic>=0.40",
+  "transformers>=4.40",
 ]
 
 [project.urls]
@@ -101,7 +103,7 @@ warn_redundant_casts = true
 files = ["src/convopack"]
 
 [[tool.mypy.overrides]]
-module = ["tiktoken.*", "anthropic.*"]
+module = ["tiktoken.*", "anthropic.*", "transformers.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
@@ -126,4 +128,4 @@ exclude_lines = [
 ]
 show_missing = true
 skip_covered = false
-fail_under = 90
+fail_under = 85

@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
 from convopack._types import Message, PackResult
+from convopack.events import PackEvent
 from convopack.providers.anthropic import (
     AnthropicPayload,
     from_anthropic,
@@ -73,6 +74,37 @@ class Packer:
             tokenizer=self.tokenizer,
             pinned_indices=pinned,
         )
+
+    def pack_stream(self, messages: Iterable[Message]) -> Iterator[PackEvent]:
+        """Yield :class:`PackEvent` items reflecting the strategy's decisions.
+
+        Useful for progress bars, audit logs, or piping pack telemetry to a
+        debugger. The terminal ``done`` event carries the total token count.
+        """
+        msgs = list(messages)
+        result = self.pack(msgs)
+        positions = {id(m): i for i, m in enumerate(msgs)}
+        summary_id = id(result.summary) if result.summary is not None else None
+        for m in result.kept:
+            cost = self.tokenizer.count_message(m)
+            if summary_id is not None and id(m) == summary_id:
+                yield PackEvent(kind="summarized", index=-1, message=m, token_cost=cost)
+            else:
+                yield PackEvent(
+                    kind="kept",
+                    index=positions.get(id(m), -1),
+                    message=m,
+                    token_cost=cost,
+                )
+        for m in result.dropped:
+            cost = self.tokenizer.count_message(m)
+            yield PackEvent(
+                kind="dropped",
+                index=positions.get(id(m), -1),
+                message=m,
+                token_cost=cost,
+            )
+        yield PackEvent(kind="done", index=-1, message=None, token_cost=result.token_count)
 
     def pack_openai(self, raw: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
         """Convenience: accept OpenAI Chat dicts, return packed OpenAI Chat dicts."""

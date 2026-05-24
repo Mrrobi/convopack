@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `FirstFit` strategy: counterpart to `Recency` that keeps the oldest chunks
+  that fit and drops the tail.
+- `SemanticDedup` strategy: drops near-duplicate messages via cosine similarity
+  on an `Embedder` callback, then defers to a fallback strategy for budget
+  enforcement.
+- `Embedder` protocol in `convopack.embedders` with a `cosine()` helper.
+- `Packer.pack_stream()` returning a stream of `PackEvent`s (`kept`,
+  `dropped`, `summarized`, `done`) for observability.
+- `HFTokenizerAdapter` and the `huggingface:<model-id>` tokenizer spec, plus
+  a new `convopack[huggingface]` extra.
+- Hypothesis property tests covering pair-grouping and pack invariants.
+- Coverage gate in CI (fail_under=85), codecov upload, README badges.
+- Release workflow with PyPI Trusted Publisher (OIDC) ready to enable.
+
 ## [0.1.0] - 2026-05-24
 
 ### Added

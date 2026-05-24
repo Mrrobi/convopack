@@ -45,12 +45,13 @@ packed = packer.pack(messages)        # list[dict] in, list[dict] out
 
 ## Strategies
 
-| Strategy        | When to use                                              |
-| --------------- | -------------------------------------------------------- |
-| `Recency`       | Keep the tail that fits. Cheapest, no LLM call.          |
-| `SummaryEvict`  | Summarise evicted turns into a single system message.    |
-| `Importance`    | Score each turn yourself; drop the lowest until it fits. |
-| `SemanticDedup` | Remove near-duplicate turns first.                       |
+| Strategy        | When to use                                                            |
+| --------------- | ---------------------------------------------------------------------- |
+| `Recency`       | Keep the tail that fits. Cheapest, no LLM call.                        |
+| `FirstFit`      | Keep the oldest chunks that fit. Good when system + few-shots dominate.|
+| `SummaryEvict`  | Summarise evicted turns into a single system message.                  |
+| `Importance`    | Score each turn yourself; drop the lowest until it fits.               |
+| `SemanticDedup` | Remove near-duplicate turns by embedding cosine, then fall back.       |
 
 ## Comparison
 

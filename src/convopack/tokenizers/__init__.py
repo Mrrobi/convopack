@@ -14,6 +14,7 @@ def get_tokenizer(spec: str | Tokenizer) -> Tokenizer:
     Spec formats:
       - ``"tiktoken:<encoding-or-model>"`` -- e.g. ``"tiktoken:gpt-4o"``.
       - ``"anthropic:<model>"`` -- e.g. ``"anthropic:claude-sonnet-4-6"``.
+      - ``"huggingface:<model-id>"`` -- any HuggingFace tokenizer id.
       - ``"approx"`` -- char-length / 4 estimator (zero deps).
     """
     if not isinstance(spec, str):
@@ -28,4 +29,8 @@ def get_tokenizer(spec: str | Tokenizer) -> Tokenizer:
         from convopack.tokenizers.anthropic_adapter import AnthropicAdapter
 
         return AnthropicAdapter(spec.split(":", 1)[1])
+    if spec.startswith("huggingface:"):
+        from convopack.tokenizers.huggingface_adapter import HFTokenizerAdapter
+
+        return HFTokenizerAdapter(spec.split(":", 1)[1])
     raise ValueError(f"Unknown tokenizer spec: {spec!r}")
