@@ -11,8 +11,8 @@ transformers = pytest.importorskip("transformers")
 
 @pytest.fixture(scope="module")
 def small_tokenizer_model() -> str:
-    """Use a tiny model that doesn't require a HuggingFace token to download."""
-    return "hf-internal-testing/llama-tokenizer"
+    """Use a tiny tokenizer that loads with just `transformers` (no sentencepiece)."""
+    return "gpt2"
 
 
 def test_hf_counts_text(small_tokenizer_model: str) -> None:
