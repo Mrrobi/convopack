@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "convopack"
-version = "0.3.1"
+version = "0.3.2"
 description = "Framework-agnostic, provider-agnostic context-window packer for LLM chat history."
 readme = "README.md"
 license = "MIT"
@@ -76,10 +76,13 @@ dev = [
 convopack = "convopack.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/mrrobi/convopack"
-Repository = "https://github.com/mrrobi/convopack"
-Issues = "https://github.com/mrrobi/convopack/issues"
-Changelog = "https://github.com/mrrobi/convopack/blob/main/CHANGELOG.md"
+Homepage = "https://mrrobi.github.io/convopack/"
+Documentation = "https://mrrobi.github.io/convopack/"
+Repository = "https://github.com/Mrrobi/convopack"
+Source = "https://github.com/Mrrobi/convopack"
+Issues = "https://github.com/Mrrobi/convopack/issues"
+Changelog = "https://github.com/Mrrobi/convopack/blob/main/CHANGELOG.md"
+Release-Notes = "https://github.com/Mrrobi/convopack/releases"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/convopack"]
