@@ -48,6 +48,10 @@ plugins:
             members_order: source
             filters:
               - "!^_"
+  - mkdocs-jupyter:
+      include_source: true
+      execute: false
+      ignore_h1_titles: false
 
 markdown_extensions:
   - admonition
@@ -89,6 +93,11 @@ nav:
       - DSPy integration: recipes/dspy.md
       - Async summarisation: recipes/async-summary.md
       - Custom importance scoring: recipes/importance.md
+  - Notebooks:
+      - Quickstart: notebooks/01_quickstart.ipynb
+      - Tool-pair atomicity: notebooks/02_tool_pair_atomicity.ipynb
+      - Strategies compared: notebooks/03_strategies.ipynb
+      - Prompt caching: notebooks/04_prompt_caching.ipynb
   - Why convopack: comparison.md
   - API reference: api.md
   - Changelog: changelog.md

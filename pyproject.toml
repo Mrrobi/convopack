@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "convopack"
-version = "0.3.0"
+version = "0.3.1"
 description = "Framework-agnostic, provider-agnostic context-window packer for LLM chat history."
 readme = "README.md"
 license = "MIT"
@@ -49,6 +49,7 @@ docs = [
   "mkdocs>=1.6",
   "mkdocs-material>=9.5",
   "mkdocstrings[python]>=0.26",
+  "mkdocs-jupyter>=0.25",
   "pymdown-extensions>=10.10",
 ]
 all = [
@@ -97,6 +98,7 @@ include = [
 line-length = 100
 target-version = "py310"
 src = ["src", "tests"]
+extend-exclude = ["docs/notebooks/*.ipynb"]
 
 [tool.ruff.lint]
 select = [

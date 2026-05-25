@@ -73,6 +73,21 @@ packed = packer.pack(messages)        # list[dict] in, list[dict] out
 | Async summariser              | yes       | no                        | n/a           | n/a              |
 | Scope                         | per-turn  | per-turn                  | cross-session | per-turn         |
 
+## Example notebooks
+
+Self-contained Jupyter notebooks. Every one runs end-to-end without an API
+key (they use the zero-dependency `approx` tokenizer and deterministic
+fakes). All four are executed in CI to stay in sync with the library.
+
+| Notebook | What it covers |
+|---|---|
+| [`01_quickstart.ipynb`](docs/notebooks/01_quickstart.ipynb) | Build a `Packer`, pack a history, round-trip through OpenAI shape, scan budgets. |
+| [`02_tool_pair_atomicity.ipynb`](docs/notebooks/02_tool_pair_atomicity.ipynb) | The killer feature: `tool_use` / `tool_result` pairs stay together for every strategy. Includes a 200-iteration property check. |
+| [`03_strategies.ipynb`](docs/notebooks/03_strategies.ipynb) | Same history through all five strategies side-by-side. |
+| [`04_prompt_caching.ipynb`](docs/notebooks/04_prompt_caching.ipynb) | Anthropic `cache_control` markers, OpenAI prefix-stability signature, cost back-of-envelope. |
+
+Rendered with outputs at <https://mrrobi.github.io/convopack/notebooks/01_quickstart/>.
+
 ## License
 
 MIT

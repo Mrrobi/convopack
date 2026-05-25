@@ -7,7 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-05-24
+## [0.3.1] - 2026-05-24
+
+### Added
+- Four executable Jupyter notebooks under `docs/notebooks/`:
+  - `01_quickstart.ipynb` — first pack walkthrough.
+  - `02_tool_pair_atomicity.ipynb` — the killer feature with a 200-iteration
+    property check.
+  - `03_strategies.ipynb` — every built-in strategy side by side.
+  - `04_prompt_caching.ipynb` — Anthropic `cache_control` markers, OpenAI
+    prefix-stability signature, cost back-of-envelope.
+- `mkdocs-jupyter` plugin and a new "Notebooks" section in the docs nav so
+  notebooks render with outputs on https://mrrobi.github.io/convopack/.
+- Typed-package and uv-supported badges in README.
+
+### Changed
+- README now documents `uv add convopack` alongside `pip install`, the
+  typed-package guarantee, and links to the four example notebooks. This
+  release exists primarily to refresh the README rendered on PyPI.
+
+[0.3.1]: https://github.com/Mrrobi/convopack/releases/tag/v0.3.1
 
 ### Added
 - Prompt caching layer. `Packer(cache=True)` populates
