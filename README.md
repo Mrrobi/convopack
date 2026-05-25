@@ -4,6 +4,8 @@
 [![Python](https://img.shields.io/pypi/pyversions/convopack.svg)](https://pypi.org/project/convopack/)
 [![CI](https://github.com/Mrrobi/convopack/actions/workflows/ci.yml/badge.svg)](https://github.com/Mrrobi/convopack/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Mrrobi/convopack/branch/main/graph/badge.svg)](https://codecov.io/gh/Mrrobi/convopack)
+[![Typed](https://img.shields.io/badge/typed-yes-success.svg)](https://github.com/Mrrobi/convopack/blob/main/src/convopack/py.typed)
+[![uv](https://img.shields.io/badge/uv-supported-blueviolet.svg)](https://docs.astral.sh/uv/)
 [![License](https://img.shields.io/pypi/l/convopack.svg)](https://github.com/Mrrobi/convopack/blob/main/LICENSE)
 
 Framework-agnostic, provider-agnostic context-window packer for LLM chat history.
@@ -26,7 +28,14 @@ pip install convopack                 # core only
 pip install "convopack[tiktoken]"     # + OpenAI tokenizer
 pip install "convopack[anthropic]"    # + Anthropic tokenizer
 pip install "convopack[all]"          # everything
+
+# or with uv
+uv add convopack                       # core
+uv add "convopack[all]"                # everything
 ```
+
+The library ships a `py.typed` marker; `mypy --strict` and `pyright` both
+recognise its public types without further configuration.
 
 ## Quickstart
 
