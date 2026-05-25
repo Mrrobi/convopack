@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-05-25
+
+### Changed
+- `[project.urls]` in `pyproject.toml` expanded with `Documentation`,
+  `Source`, and `Release-Notes` keys so the PyPI sidebar links straight
+  to https://mrrobi.github.io/convopack/, the GitHub source, and the
+  release page. `Homepage` now points at the docs site (was the GitHub
+  repo, which is now also reachable via `Source`).
+
+[0.3.2]: https://github.com/Mrrobi/convopack/releases/tag/v0.3.2
+
 ## [0.3.1] - 2026-05-24
 
 ### Added
